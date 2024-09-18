@@ -1,15 +1,14 @@
 const { pool } = require('./db/config');
 const format = require('pg-format');
 
-// Función para obtener joyas con parámetros de límite, orden y paginación
+// Función para obtener joyas
 const jewelryView = async ({ limit = 2, order_by = "id_ASC", page = 0 }) => {
     try {
         // Validar los parámetros
-        limit = Math.max(parseInt(limit, 10), 1);  // Asegurarse de que el límite sea al menos 1
-        page = Math.max(parseInt(page, 10), 0);    // Asegurarse de que la página sea 0 o positiva
+        limit = Math.max(parseInt(limit, 10), 1);
+        page = Math.max(parseInt(page, 10), 0);
 
         const [field, order] = order_by.split("_");
-        // Validar el campo y el orden para evitar SQL Injection
         const validFields = ['id', 'nombre', 'categoria', 'metal', 'precio', 'stock'];
         const validOrders = ['ASC', 'DESC'];
         
