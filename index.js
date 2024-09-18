@@ -1,13 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const { logRouteAccess } = require('./src/middlewares/logMiddleware');
 const { createTable } = require('./src/db/config');
-const { getJewelsWithFilters, jewelryView } = require('./src/consultas');
 const { prepararHATEOAS } = require('./src/helpers/helpers');
 const { router } = require('./src/routes/jewelryRoutes');
 
 const app = express();
 
+app.use(logRouteAccess)
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
@@ -18,13 +19,13 @@ createTable().catch(err => {
   console.error('Error al crear la tabla:', err);
 });
 
-// Ruta para obtener joyas con parámetros de límite, orden y paginación
+// Ruta para obtener joyas
 app.get('/joyas', async (req, res) => {
   try {
     const queryStrings = {
-      limit: parseInt(req.query.limit, 10) || 2, // Valor por defecto de 2
-      order_by: req.query.order_by || 'id_ASC', // Valor por defecto de 'id_ASC'
-      page: parseInt(req.query.page, 10) || 0,  // Valor por defecto de 0
+      limit: parseInt(req.query.limit, 10) || 2,
+      order_by: req.query.order_by || 'id_ASC',
+      page: parseInt(req.query.page, 10) || 0,
     };
     const joyas = await jewelryView(queryStrings);
     const HATEOAS = prepararHATEOAS(joyas);
@@ -35,7 +36,7 @@ app.get('/joyas', async (req, res) => {
   }
 });
 
-// Ruta para obtener joyas con filtros
+// Ruta para obtener joyas filtradas
 app.get('/joyas/filtros', async (req, res) => {
   try {
     const queryStrings = req.query;
@@ -47,7 +48,7 @@ app.get('/joyas/filtros', async (req, res) => {
   }
 });
 
-// Ruta para manejar rutas no encontradas
+// Rutas no encontradas
 app.use((req, res) => {
   res.status(404).send("Esta ruta no existe");
 });
